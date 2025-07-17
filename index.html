@@ -85,7 +85,7 @@
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2025/07/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">第一篇博客</a>
+      <a class="p-name article-title" href="/2025/07/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">3DGS原理及流程理解</a>
     </h1>
   
 
@@ -94,23 +94,67 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
         <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a><br><img src="https://cdn.jsdelivr.net/gh/KageyamaTobioo/BlogImage/KageyamaTobioo/BlogImage/Images/da3d236f_E349073_9d15b4cb.png" alt="da3d236f_E349073_9d15b4cb"><br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/c344f95b_E346743_e7f087a7.png" alt="c344f95b_E346743_e7f087a7"></p>
+<h1 id="一、豆包描述的3DGS流程"><a href="#一、豆包描述的3DGS流程" class="headerlink" title="一、豆包描述的3DGS流程"></a>一、豆包描述的3DGS流程</h1><h2 id="场景描述初始化"><a href="#场景描述初始化" class="headerlink" title="场景描述初始化"></a>场景描述初始化</h2><p>1.输入数据：以静态场景的多视角图像及通过运动恢复结构（SfM）校准的相机参数为输入，SfM 过程会生成稀疏点云作为副产物。<br>2.3D 高斯初始化：基于 SfM 生成的稀疏点云，初始化 3D 高斯集合。每个 3D 高斯由位置（均值）、协方差矩阵（描述形状，支持各向异性）、不透明度（α）和球谐函数（SH）系数（描述方向颜色）定义。其中，协方差矩阵初始化为各向同性高斯，其轴长设为到最近三个点距离的均值。</p>
+<h2 id="优化与自适应密度控制"><a href="#优化与自适应密度控制" class="headerlink" title="优化与自适应密度控制"></a>优化与自适应密度控制</h2><p>1.参数优化：通过迭代渲染生成图像，并与训练视图对比计算损失（采用 L₁损失与 D-SSIM 损失结合的方式），使用随机梯度下降（SGD）优化 3D 高斯的参数（位置、协方差、不透明度、SH 系数）。优化过程中，对不透明度采用 sigmoid 激活函数约束在 [0,1) 范围，对协方差尺度采用指数激活函数，以保证梯度平滑。<br>2.自适应密度控制：在优化预热后，每 100 次迭代进行一次高斯密度调整：<br>** densification（增密）<strong>：对视图空间位置梯度平均值超过阈值的高斯进行处理。若高斯较小（对应 “欠重建” 区域），则克隆并沿梯度方向移动；若高斯较大（对应 “过重建” 区域），则分裂为两个更小的高斯。<br>** pruning（修剪）</strong>：移除不透明度低于阈值的高斯，避免无效计算。</p>
+<h2 id="快速可微分渲染"><a href="#快速可微分渲染" class="headerlink" title="快速可微分渲染"></a>快速可微分渲染</h2><p>1.投影与光栅化准备：将 3D 高斯投影到 2D 图像空间，通过视图变换和雅可比矩阵计算相机坐标下的协方差矩阵，得到 2D 高斯（splats）。将屏幕划分为 16×16 的瓦片，对高斯进行视锥体剔除和瓦片筛选，保留与瓦片相交的高斯。<br>2.排序与混合：为每个高斯实例分配包含视图空间深度和瓦片 ID 的键，通过 GPU 快速基数排序按深度排序高斯，确保渲染时的可见性顺序（前向混合）。每个瓦片的线程块协作加载高斯数据，对像素进行 α 混合，直到像素不透明度饱和（接近 1）。<br>3.反向传播：在反向传播中，复用前向排序结果，按后向顺序遍历高斯，通过存储的累积不透明度恢复中间值，计算梯度以更新参数，且不限制参与梯度计算的高斯数量。</p>
+<h1 id="对3DGS原理的理解"><a href="#对3DGS原理的理解" class="headerlink" title="对3DGS原理的理解"></a>对3DGS原理的理解</h1><p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752720281640.png" alt="QQ_1752720281640"></p>
+<h2 id="捏雪球"><a href="#捏雪球" class="headerlink" title="捏雪球"></a>捏雪球</h2><p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752720507862.png" alt="QQ_1752720507862"></p>
+<p>NeRF算法的主角是像素点，3DGS的主角是发光粒子</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752720684362.png" alt="QQ_1752720684362"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752720751958.png" alt="QQ_1752720751958"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752720812077.png" alt="QQ_1752720812077"><br>最开始是生成的点云，点云全都是点，是没有体积的</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752720940451.png" alt="QQ_1752720940451"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752721026008.png" alt="QQ_1752721026008"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752721115724.png" alt="QQ_1752721115724"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752721191094.png" alt="QQ_1752721191094"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752721251962.png" alt="QQ_1752721251962"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752721352743.png" alt="QQ_1752721352743"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752721435456.png" alt="QQ_1752721435456"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752721631842.png" alt="QQ_1752721631842"><br>任意高斯可以看作是标准高斯通过仿射变换得到，这可能就是论文中协方差矩阵初始化为各向同性的原因。<br>图中的x其实是一个向量，x &#x3D; [x,y,z]</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752721912024.png" alt="QQ_1752721912024"><br>w &#x3D; Ax + b是仿射变换的公式，图中的A &#x3D; RS公式中的R是旋转矩阵，S是缩放矩阵，所以协方差矩阵可以用旋转和缩放矩阵表达。图中右侧的公式是论文中的一个核心公式。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752722129408.png" alt="QQ_1752722129408"><br>如果已经知道了协方差矩阵，旋转矩阵R和缩放矩阵S可以用特征值分解来求。</p>
+<h2 id="抛雪球"><a href="#抛雪球" class="headerlink" title="抛雪球"></a>抛雪球</h2><p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752722424645.png" alt="QQ_1752722424645"><br>抛雪球，也就是Splatting，就是一个从3D到像素的一个过程；up主说观测变换是从世界坐标系到相机坐标系，视口变换是从相机坐标系到2D；<br>相机坐标系——横看成岭侧成峰，远近高低各不同</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752722714107.png" alt="QQ_1752722714107"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752722810739.png" alt="QQ_1752722810739"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752722912484.png" alt="QQ_1752722912484"><br>上图解释了正交投影，图中写出M矩阵是由两个矩阵相乘得到，其中左边的那个矩阵就是旋转矩阵，右边的那个是缩放矩阵。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752727052656.png" alt="QQ_1752727052656"><br>先进行透视投影，再进行正交投影；透视投影是非线性的，即非仿射变换，而我们希望高斯椭球一直进行仿射变换。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752727268479.png" alt="QQ_1752727268479"><br>透视投影和正交投影完了之后得到了一个范围为[-1,1]的正方体，然后对这个正方体进行视口变换，也就是将正方体拉伸到你想要的大小；</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752727816234.png" alt="QQ_1752727816234"><br>然后进行光栅化，其定义与作用如上图。</p>
+<h3 id="带入到3DGS来理解"><a href="#带入到3DGS来理解" class="headerlink" title="带入到3DGS来理解"></a>带入到3DGS来理解</h3><p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752728114856.png" alt="QQ_1752728114856"><br>首先是观测变换，就是由世界坐标系到相机坐标系</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752728285247.png" alt="QQ_1752728285247"><br>然后要进行投影变换，也就是将锥体压成长方体，然后将长方体压成正方体。这里进行的是非线性变换，3D高斯的均值可以进行非线性变换，因为它就是一个点；但是协方差矩阵呢？</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752728736070.png" alt="QQ_1752728736070"><br>从透视投影到正交投影，是不能进行非线性变换，也就是非仿射变换的，怎么办呢？在这里也就引入了雅可比矩阵。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752729350564.png" alt="QQ_1752729350564"><br>雅可比矩阵，图中的f1(x)和f2(x)感觉就是变换后的x和y。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752729575919.png" alt="QQ_1752729575919"><br>引入了雅可比矩阵后的3DGS的投影变换。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752729764957.png" alt="QQ_1752729764957"><br>此时的均值和协方差不在一个坐标系里，均值是进行了正常的投影变换，也就是先将锥体压成长方体，再将长方体压缩、平移成正方体；而协方差是用到了雅可比矩阵的变换，他只进行了锥体压到长方体的过程。所以均值需要进行视口变换，协方差不需要。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752730290601.png" alt="QQ_1752730290601"><br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752730339033.png" alt="QQ_1752730339033"><br>上面两张图推导出了投影变换的雅可比矩阵。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752730441196.png" alt="QQ_1752730441196"><br>视口变换只对高斯中心做，和协方差没关系。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752730560186.png" alt="QQ_1752730560186"><br>3D高斯中心的变换包括观测变换、投影变换、视口变换、光栅化</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752731056416.png" alt="QQ_1752731056416"><br>3D高斯协方差矩阵的变换包括观测变换和透视变换，图中的W就是观测变换矩阵，矩阵J就是透视变换矩阵。</p>
+<h2 id="雪球颜色"><a href="#雪球颜色" class="headerlink" title="雪球颜色"></a>雪球颜色</h2><h3 id="球谐函数"><a href="#球谐函数" class="headerlink" title="球谐函数"></a>球谐函数</h3><p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752731550274.png" alt="QQ_1752731550274"><br>引入了球谐函数的概念，球谐函数描述3D高斯的颜色。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752731880433.png" alt="QQ_1752731880433"><br>这张图具体讲解了球谐函数的系数，其中系数c是三维的，因为要描述RGB三个通道的颜色。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752732109058.png" alt="QQ_1752732109058"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752732237898.png" alt="QQ_1752732237898"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752732377872.png" alt="QQ_1752732377872"><br>球谐函数和3D高斯并不是一个东西，球谐函数只是用来描述颜色的。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752732540406.png" alt="QQ_1752732540406"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752732612563.png" alt="QQ_1752732612563"></p>
+<h3 id="像素的颜色"><a href="#像素的颜色" class="headerlink" title="像素的颜色"></a>像素的颜色</h3><p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752732766160.png" alt="QQ_1752732766160"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752732958647.png" alt="QQ_1752732958647"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752733119781.png" alt="QQ_1752733119781"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752733291850.png" alt="QQ_1752733291850"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752733525295.png" alt="QQ_1752733525295"><br>公式右边的ci好像是球谐函数</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752733601795.png" alt="QQ_1752733601795"></p>
+<h3 id="3DGS为什么快？"><a href="#3DGS为什么快？" class="headerlink" title="3DGS为什么快？"></a>3DGS为什么快？</h3><p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752733918046.png" alt="QQ_1752733918046"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752734011217.png" alt="QQ_1752734011217"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752734493453.png" alt="QQ_1752734493453"></p>
+<h2 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h2><p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752734689535.png" alt="QQ_1752734689535"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752734815736.png" alt="QQ_1752734815736"><br>机器学习的大致步骤就是，假设点云已经生成了，将每个点膨胀成3D高斯椭球，每个椭球含有的参数如图所示，然后splatting将椭球变成一张图，将生成的图和Groud Truth对比，计算损失，然后用优化算法来优化椭球的参数。</p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752735207473.png" alt="QQ_1752735207473"></p>
+<p><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1752735334240.png" alt="QQ_1752735334240"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/07/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" data-id="cmd6rueep0000r8ua2u3vg8sr" data-title="第一篇博客" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2025/07/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" data-id="cmd74dmbd0001fsua79rfbl66" data-title="3DGS原理及流程理解" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -161,7 +205,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/07/13/hello-world/" data-id="cmd6rueet0001r8uahyug5w3h" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2025/07/13/hello-world/" data-id="cmd74dmba0000fsua0ivl3645" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -204,7 +248,7 @@
       <ul>
         
           <li>
-            <a href="/2025/07/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">第一篇博客</a>
+            <a href="/2025/07/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">3DGS原理及流程理解</a>
           </li>
         
           <li>
