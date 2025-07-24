@@ -14,11 +14,11 @@
 <meta property="og:description" content="运行3dgs代码需要先配置好环境。之前在autodl上搭建环境很快就搭建好了，但是在学校的服务器上搭建了很久，踩了很多坑。还好最终搭建好了。在此记录一下。 首先从github上将代码git下来 [bash] [url] [link text]12git clone https:&#x2F;&#x2F;github.com&#x2F;graphdeco-inria&#x2F;gaussian-splatting --recursivecd">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753325944945.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332313519.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332566693.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332838717.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332313520.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332566694.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332838718.png">
 <meta property="article:published_time" content="2025-07-24T02:56:39.000Z">
-<meta property="article:modified_time" content="2025-07-24T04:56:11.545Z">
+<meta property="article:modified_time" content="2025-07-24T05:08:21.536Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753325944945.png">
@@ -117,9 +117,9 @@
 <p>在这里就出现了错误：<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753325944945.png" alt="QQ_1753325944945"><br>Error显示CUDA的版本和PyTorch的版本不匹配。PyTorch版本是我想下载的11.8，但是CUDA版本是12.1</p>
 <p>然后我用命令查看nvcc的版本</p>
 <figure class="highlight plaintext"><figcaption><span>[bash] [url] [link text]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvcc --version</span><br></pre></td></tr></table></figure>
-<p>得到终端的输出如下：<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332313519.png" alt="QQ_1753332313519"><br>显示找不到nvcc这个指令。后来我在网上查了很久才找到解决方法。下载CUDA之后需要将CUDA放在环境变量中才可以。</p>
+<p>得到终端的输出如下：<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332313520.png" alt="QQ_1753332313520"><br>显示找不到nvcc这个指令。后来我在网上查了很久才找到解决方法。下载CUDA之后需要将CUDA放在环境变量中才可以。</p>
 <h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><h3 id="1-查看CUDA位置"><a href="#1-查看CUDA位置" class="headerlink" title="1.查看CUDA位置"></a>1.查看CUDA位置</h3><figure class="highlight plaintext"><figcaption><span>[bash] [url] [link text]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local </span><br></pre></td></tr></table></figure>
-<p>一般在&#x2F;usr&#x2F;local目录下会有CUDA文件夹或软链，如下所示：<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332566693.png" alt="QQ_1753332566693"></p>
+<p>一般在&#x2F;usr&#x2F;local目录下会有CUDA文件夹或软链，如下所示：<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332566694.png" alt="QQ_1753332566694"></p>
 <h3 id="2-打开、编辑环境变量的配置文件"><a href="#2-打开、编辑环境变量的配置文件" class="headerlink" title="2.打开、编辑环境变量的配置文件"></a>2.打开、编辑环境变量的配置文件</h3><figure class="highlight plaintext"><figcaption><span>[bash] [url] [link text]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim ~/.bashrc </span><br></pre></td></tr></table></figure>
 
 <p>在文件末尾添加：</p>
@@ -129,7 +129,7 @@
 
 <h3 id="4-重新使用nvcc命令查看CUDA版本"><a href="#4-重新使用nvcc命令查看CUDA版本" class="headerlink" title="4.重新使用nvcc命令查看CUDA版本"></a>4.重新使用nvcc命令查看CUDA版本</h3><p>输入：</p>
 <figure class="highlight plaintext"><figcaption><span>[bash] [url] [link text]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvcc --version</span><br></pre></td></tr></table></figure>
-<p>输出：<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332838717.png" alt="QQ_1753332838717"></p>
+<p>输出：<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753332838718.png" alt="QQ_1753332838718"></p>
 <p>问题就解决啦</p>
 <p>参考文章：<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_74304677/article/details/144065919">https://blog.csdn.net/m0_74304677/article/details/144065919</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ksky-2023/p/17389977.html">https://www.cnblogs.com/ksky-2023/p/17389977.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/liu_feng_zi_/article/details/107234271">https://blog.csdn.net/liu_feng_zi_/article/details/107234271</a></p>
 
