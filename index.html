@@ -71,6 +71,54 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-跑3dgs代码的步骤" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/07/25/%E8%B7%913dgs%E4%BB%A3%E7%A0%81%E7%9A%84%E6%AD%A5%E9%AA%A4/" class="article-date">
+  <time class="dt-published" datetime="2025-07-25T08:09:46.000Z" itemprop="datePublished">2025-07-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2025/07/25/%E8%B7%913dgs%E4%BB%A3%E7%A0%81%E7%9A%84%E6%AD%A5%E9%AA%A4/">跑3dgs代码的步骤</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="1-准备图片数据集"><a href="#1-准备图片数据集" class="headerlink" title="1.准备图片数据集"></a>1.准备图片数据集</h2><p>首先拍摄一段视频，将其放在3dgs的data文件夹里，并在当前文件夹中新建一个input文件用于存放ffmpeg抽帧的图片。<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753431248263.png" alt="QQ_1753431248263"></p>
+<p>然后在当前文件夹右键用终端打开，之后输入命令：</p>
+<figure class="highlight plaintext"><figcaption><span>[bash] [url] [link text]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i input.mp4 -vf &quot;setpts=0.2*PTS&quot; input/input_%4d.jpg</span><br></pre></td></tr></table></figure>
+<p>其中“setpts&#x3D;0.2*PTS”的意思就是每0.2秒抽一张图片，也就是1秒5张。</p>
+<p>然后就可以看到从视频中抽帧出来的图片被存放在input文件夹中。<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753432339423.png" alt="QQ_1753432339423"></p>
+<h2 id="2-运行convert-py文件"><a href="#2-运行convert-py文件" class="headerlink" title="2.运行convert.py文件"></a>2.运行convert.py文件</h2><p>在gaussian-splatting文件夹右键用终端打开，或者在vscode的gaussian-splatting的workspace下，在终端运行以下指令</p>
+<figure class="highlight plaintext"><figcaption><span>[bash] [url] [link text]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python convert.py -s data/YOURIMAGEFOLDER --camera SIMPLE_PINHOLE</span><br></pre></td></tr></table></figure>
+<p>运行结束后可以看到数据集的文件夹多了一些文件<br><img src="https://raw.githubusercontent.com/KageyamaTobioo/BlogImage/Tobio/KageyamaTobioo/BlogImage/Images/QQ_1753432741022.png" alt="QQ_1753432741022"></p>
+<h2 id="3-开始训练"><a href="#3-开始训练" class="headerlink" title="3.开始训练"></a>3.开始训练</h2><p>将images文件夹和distorted&#x2F;sparse文件夹复制到服务器的data&#x2F;YOURDATAFOLDER文件夹中<br>然后运行命令</p>
+<figure class="highlight plaintext"><figcaption><span>[bash] [url] [link text]</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python train.py -s ./data/YOURDATAFOLDER</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2025/07/25/%E8%B7%913dgs%E4%BB%A3%E7%A0%81%E7%9A%84%E6%AD%A5%E9%AA%A4/" data-id="cmdikqwr000046kua7cdvafbd" data-title="跑3dgs代码的步骤" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-在学校服务器配置3dgs环境踩过的坑" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2025/07/24/%E5%9C%A8%E5%AD%A6%E6%A0%A1%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE3dgs%E7%8E%AF%E5%A2%83%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91/" class="article-date">
@@ -129,7 +177,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/07/24/%E5%9C%A8%E5%AD%A6%E6%A0%A1%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE3dgs%E7%8E%AF%E5%A2%83%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91/" data-id="cmdgx7fsw0001k0uabjps06b2" data-title="在学校服务器配置3dgs环境踩过的坑" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2025/07/24/%E5%9C%A8%E5%AD%A6%E6%A0%A1%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE3dgs%E7%8E%AF%E5%A2%83%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91/" data-id="cmdikqwqz00036kuag3plf9io" data-title="在学校服务器配置3dgs环境踩过的坑" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -167,7 +215,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/07/23/Games101-%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" data-id="cmdgx7fsy0002k0uabu2g8gj2" data-title="Games101-线性代" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2025/07/23/Games101-%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" data-id="cmdikqwqu00006kuafcza4o4m" data-title="Games101-线性代" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -262,7 +310,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/07/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" data-id="cmdgx7ft30003k0ua2m5d0qrj" data-title="3DGS原理及流程理解" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2025/07/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" data-id="cmdikqwqx00016kuacf1l9co1" data-title="3DGS原理及流程理解" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -313,7 +361,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/07/13/hello-world/" data-id="cmdgx7fst0000k0uaaq33gj2y" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2025/07/13/hello-world/" data-id="cmdikqwqy00026kua4yngdyzb" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -354,6 +402,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2025/07/25/%E8%B7%913dgs%E4%BB%A3%E7%A0%81%E7%9A%84%E6%AD%A5%E9%AA%A4/">跑3dgs代码的步骤</a>
+          </li>
         
           <li>
             <a href="/2025/07/24/%E5%9C%A8%E5%AD%A6%E6%A0%A1%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE3dgs%E7%8E%AF%E5%A2%83%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91/">在学校服务器配置3dgs环境踩过的坑</a>
